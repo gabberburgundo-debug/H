@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Wellness Analyzer (Demo)</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; }
+        .disclaimer { text-align: center; color: #d9534f; font-weight: bold; margin-bottom: 20px; padding: 10px; background-color: #fdd; border: 1px solid #d9534f; border-radius: 5px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; border: none; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        #results { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; display: none; }
+        #visual-algorithm { margin-top: 20px; width: 100%; height: 200px; border: 1px solid #ccc; background-color: #e9ecef; position: relative; overflow: hidden; border-radius: 5px; }
+        .result-text { font-size: 1.2em; text-align: center; margin-bottom: 15px; }
+        #saved-data { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        .saved-entry { padding: 10px; border-bottom: 1px solid #eee; }
+        .saved-entry:last-child { border-bottom: none; }
+        .circle { position: absolute; border-radius: 50%; animation: pulse 2s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.1); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analizzatore di Benessere Mentale (Demo)</h1>
+        <p class="disclaimer">⚠️ ATTENZIONE: Questo strumento è solo a scopo dimostrativo. I risultati generati sono casuali e non hanno alcun valore medico. Consultare sempre un professionista sanitario per qualsiasi problema di salute.</p>
+        
+        <div class="input-group">
+            <label for="name">Nome utente (opzionale):</label>
+            <input type="text" id="name" placeholder="Inserisci il nome">
+        </div>
+        <div class="input-group">
+            <label for="age">Età:</label>
+            <input type="number" id="age" min="1" placeholder="Inserisci l'età" required>
+        </div>
+        <div class="input-group">
+            <label for="symptoms">Sintomi/stato d'animo:</label>
+            <input type="text" id="symptoms" placeholder="Es. Ansia, difficoltà a dormire" required>
+        </div>
+        
+        <button id="analyze-btn">Genera Analisi (Demo)</button>
+        
+        <div id="results">
+            <p class="result-text" id="percentage-result"></p>
+            <div id="visual-algorithm"></div>
+            <div id="sonic-result"></div>
+            <p id="recommendation-text"></p>
+            <button id="save-data-btn">Salva Dati Analisi</button>
+        </div>
+        
+        <div id="saved-data">
+            <h2>Dati Salvati Localmente</h2>
+            <ul id="saved-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const saveBtn = document.getElementById('save-data-btn');
+        const resultsDiv = document.getElementById('results');
+        const percentageResult = document.getElementById('percentage-result');
+        const visualAlgorithmDiv = document.getElementById('visual-algorithm');
+        const recommendationText = document.getElementById('recommendation-text');
+        const savedList = document.getElementById('saved-list');
+
+        let lastResult = null;
+
+        analyzeBtn.addEventListener('click', () => {
+            const age = document.getElementById('age').value;
+            const symptoms = document.getElementById('symptoms').value;
+            const name = document.getElementById('name').value;
+
+            if (!age || !symptoms) {
+                alert('Per favore, inserisci almeno età e sintomi.');
+                return;
+            }
+
+            // --- Simulazione Algoritmo ---
+            const percentage = Math.floor(Math.random() * 101);
+            const isAudible = Math.random() < 0.5; // Simula una preferenza/disabilità uditiva
+            const isVisual = Math.random() < 0.5; // Simula una preferenza/disabilità visiva
+            const recommendation = generateRecommendation(percentage, isAudible, isVisual);
+            
+            lastResult = {
+                name,
+                age,
+                symptoms,
+                percentage,
+                recommendation,
+                date: new Date().toLocaleString()
+            };
+
+            // --- Aggiorna la UI ---
+            resultsDiv.style.display = 'block';
+            percentageResult.textContent = `Risultato casuale: ${percentage}% (simulazione)`;
+            recommendationText.textContent = `Suggerimento: ${recommendation}`;
+            
+            // Output visivo (cerchi animati)
+            generateVisualAlgorithm(percentage, isVisual);
+
+            // Output sonoro (sintesi vocale)
+            generateSonicAlgorithm(percentage, isAudible);
+        });
+
+        saveBtn.addEventListener('click', () => {
+            if (lastResult) {
+                saveData(lastResult);
+                lastResult = null;
+                alert('Dati salvati con successo!');
+            }
+        });
+
+        function generateVisualAlgorithm(percentage, isVisual) {
+            visualAlgorithmDiv.innerHTML = '';
+            if (isVisual) {
+                const numCircles = Math.floor(percentage / 10) + 1;
+                const colors = ['#f8b400', '#2a9d8f', '#e76f51', '#457b9d'];
+                for (let i = 0; i < numCircles; i++) {
+                    const circle = document.createElement('div');
+                    circle.classList.add('circle');
+                    const size = Math.random() * 50 + 20;
+                    circle.style.width = `${size}px`;
+                    circle.style.height = `${size}px`;
+                    circle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    circle.style.left = `${Math.random() * 90}%`;
+                    circle.style.top = `${Math.random() * 90}%`;
+                    visualAlgorithmDiv.appendChild(circle);
+                }
+            } else {
+                visualAlgorithmDiv.innerHTML = '<p style="text-align: center; margin-top: 40%;">Output visivo disattivato per preferenza o necessità.</p>';
+            }
+        }
+
+        function generateSonicAlgorithm(percentage, isAudible) {
+            const sonicResultDiv = document.getElementById('sonic-result');
+            if (isAudible) {
+                sonicResultDiv.innerHTML = '';
+                const synth = window.speechSynthesis;
+                if (synth) {
+                    const utterThis = new SpeechSynthesisUtterance(`La percentuale simulata è ${percentage} per cento. Il suggerimento è: ${lastResult.recommendation}`);
+                    synth.speak(utterThis);
+                } else {
+                    sonicResultDiv.innerHTML = '<p>Sintesi vocale non supportata.</p>';
+                }
+            } else {
+                sonicResultDiv.innerHTML = '<p>Output sonoro disabilitato per preferenza o necessità.</p>';
+            }
+        }
+        
+        function generateRecommendation(percentage, isAudible, isVisual) {
+            let suggestion;
+            if (percentage < 30) {
+                suggestion = "Simulazione suggerisce un potenziale basso. Continuare a monitorare lo stato emotivo.";
+            } else if (percentage < 70) {
+                suggestion = "Simulazione suggerisce un'attenzione moderata. Potrebbe essere utile discutere i sintomi con un professionista.";
+            } else {
+                suggestion = "Simulazione suggerisce un'attenzione alta. Si raccomanda un immediato contatto con un professionista sanitario.";
+            }
+            
+            if (!isAudible && !isVisual) {
+                 suggestion += " Per una migliore comprensione, si consiglia un consulto con un professionista che possa offrire supporto sia visivo che sonoro.";
+            } else if (!isAudible) {
+                suggestion += " Suggerimento adattato per output visivo: utilizzare il feedback testuale e grafico per l'analisi.";
+            } else if (!isVisual) {
+                suggestion += " Suggerimento adattato per output sonoro: si raccomanda l'uso di cuffie e l'ascolto della sintesi vocale.";
+            }
+
+            return suggestion;
+        }
+
+        // Funzione per salvare e caricare i dati
+        function saveData(data) {
+            let entries = JSON.parse(localStorage.getItem('analysisData')) || [];
+            entries.push(data);
+            localStorage.setItem('analysisData', JSON.stringify(entries));
+            displaySavedData();
+        }
+
+        function displaySavedData() {
+            const entries = JSON.parse(localStorage.getItem('analysisData')) || [];
+            savedList.innerHTML = '';
+            entries.forEach(entry => {
+                const li = document.createElement('li');
+                li.classList.add('saved-entry');
+                li.innerHTML = `<strong>Nome:</strong> ${entry.name || 'N/A'}<br>
+                                <strong>Età:</strong> ${entry.age}<br>
+                                <strong>Sintomi:</strong> ${entry.symptoms}<br>
+                                <strong>Percentuale (Demo):</strong> ${entry.percentage}%<br>
+                                <strong>Data:</strong> ${entry.date}`;
+                savedList.appendChild(li);
+            });
+        }
+
+        // Carica i dati all'avvio
+        document.addEventListener('DOMContentLoaded', displaySavedData);
+    </script>
+</body>
+</html>
